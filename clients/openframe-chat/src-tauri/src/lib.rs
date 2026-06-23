@@ -216,6 +216,7 @@ fn register_start_menu_shortcut() {
 
     // Escape single quotes for PowerShell single-quoted string literals.
     let esc = |s: &str| s.replace('\'', "''");
+    // SHChangeNotify(SHCNE_ASSOCCHANGED) makes Start surface the new .lnk now instead of after a reboot.
     let script = format!(
         "$ws=New-Object -ComObject WScript.Shell; \
          $s=$ws.CreateShortcut('{lnk}'); \
@@ -223,7 +224,9 @@ fn register_start_menu_shortcut() {
          $s.IconLocation='{exe},0'; \
          $s.WorkingDirectory='{dir}'; \
          $s.Description='OpenFrame Chat'; \
-         $s.Save()",
+         $s.Save(); \
+         Add-Type -Namespace W -Name S -MemberDefinition '[System.Runtime.InteropServices.DllImport(\"shell32.dll\")] public static extern void SHChangeNotify(int e, uint f, System.IntPtr a, System.IntPtr b);'; \
+         [W.S]::SHChangeNotify(0x08000000, 0, [System.IntPtr]::Zero, [System.IntPtr]::Zero)",
         lnk = esc(&lnk.to_string_lossy()),
         exe = esc(&exe),
         dir = esc(&work_dir),
