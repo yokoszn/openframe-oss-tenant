@@ -1,0 +1,19 @@
+[package]
+name = "sangdb-bindings-cassandra"
+version.workspace = true
+edition.workspace = true
+description = "Cassandra CQL → sangdb column/fold face. Replaces openframe-data-cassandra from openframe-oss-lib. The column face is the proven GROUP-BY fold (51–517× vs DuckDB on the CWI measurement), so the migration collapses the CQL AST into one B/U applicative over a hashtrinity::Table."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+bedrock = { workspace = true }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+bytes = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }

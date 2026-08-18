@@ -1,0 +1,20 @@
+[package]
+name = "sangdb-bindings-mongodb"
+version.workspace = true
+edition.workspace = true
+description = "MongoDB wire-protocol bindings over sangdb's row face — lets existing MongoDB drivers (Java/Spring Data MongoDB, Python pymongo, Go mongo-go-driver) talk to a sangdb server as if it were a mongod. Replaces openframe-data-mongo-sync / openframe-data-mongo-reactive / openframe-data-mongo-common from openframe-oss-lib. Implements OP_MSG (the modern wire protocol since MongoDB 3.6) over a hashtrinity::Table."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+bedrock = { workspace = true }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+bytes = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }

@@ -1,0 +1,18 @@
+[package]
+name = "of-gateway"
+version.workspace = true
+edition.workspace = true
+description = "openframe-gateway — replaces Spring Cloud Gateway (WebFlux/Netty). Routes /api/* → of-api, /external-api/* → of-external-api, /stream/* → of-stream, /auth/* → of-authorization, /agent/* → of-client-svc. JWT validation (RS256) and tenant-scope enforcement live here. Reverse-proxy state is a hashtrinity::Table<route, Backend>."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["env"] }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }

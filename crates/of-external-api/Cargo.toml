@@ -1,0 +1,18 @@
+[package]
+name = "of-external-api"
+version.workspace = true
+edition.workspace = true
+description = "openframe-external-api — replaces openframe-external-api-service-core. Public REST API surface (rate-limited, API-key authenticated) served from the same hashtrinity::Table store as of-api. The API-key validation moves to a tenant-scoped row lookup; the rate-limit moves to a per-key counter fold."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["env"] }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }

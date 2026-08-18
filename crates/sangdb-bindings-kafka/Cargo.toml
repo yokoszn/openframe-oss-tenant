@@ -1,0 +1,18 @@
+[package]
+name = "sangdb-bindings-kafka"
+version.workspace = true
+edition.workspace = true
+description = "Kafka wire-protocol → sangdb column/fold face. Replaces openframe-data-kafka (producer side) + Kafka Streams consumers in openframe-stream-service-core. Each Kafka topic becomes a sangdb Log with per-tenant topic prefixes; consumer groups ride the streaming-law fold (Tabular.learn_order_free) so the kafka consumer-group semantics drop out for free."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+bedrock = { workspace = true }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+bytes = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }

@@ -1,0 +1,17 @@
+[package]
+name = "of-config"
+version.workspace = true
+edition.workspace = true
+description = "openframe-config service — replaces Spring Cloud Config Server. Configs stored in a hashtrinity::Table, served via a minimal tokio HTTP server. Each (tenant, application, profile, label) is a row; the lookup is O(1). Replaces the Spring Cloud Config Server contract (GET /{application}/{profile}, POST to publish)."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["env"] }
+uuid = { workspace = true }

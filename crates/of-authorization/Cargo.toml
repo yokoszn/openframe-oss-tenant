@@ -1,0 +1,18 @@
+[package]
+name = "of-authorization"
+version.workspace = true
+edition.workspace = true
+description = "openframe-authorization-server — replaces openframe-authorization-service-core (Spring Authorization Server + MongoDB). RS256 JWT issuance + verification + OAuth2/OIDC endpoints, all backed by hashtrinity::Table. The cookie-based session that upstream Spring Authorization Server issues becomes a tenant-scoped row."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["env"] }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }

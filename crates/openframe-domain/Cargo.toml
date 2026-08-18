@@ -1,0 +1,13 @@
+[package]
+name = "openframe-domain"
+version.workspace = true
+edition.workspace = true
+description = "Shared domain types for OpenFrame — replaces openframe-data-mongo-common, openframe-data-device-aspect, openframe-data-timeentry-aspect from openframe-oss-lib. All types serialize through hashtrinity::codec (the universal Term encoder) and persist via sangdb row/column faces."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+chrono = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }

@@ -1,236 +1,82 @@
-<div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://shdrojejslhgnojzkzak.supabase.co/storage/v1/object/public/public/doc-orchestrator/logos/1771371901777-lc3cse-logo-openframe-full-dark-bg.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://shdrojejslhgnojzkzak.supabase.co/storage/v1/object/public/public/doc-orchestrator/logos/1771372526604-k3y1w-logo-openframe-full-light-bg.png">
-    <img alt="OpenFrame" src="https://shdrojejslhgnojzkzak.supabase.co/storage/v1/object/public/public/doc-orchestrator/logos/1771372526604-k3y1w-logo-openframe-full-light-bg.png" width="400">
-  </picture>
-</div>
+# openframe-sangdb
 
-<p align="center">
-  <a href="LICENSE.md"><img alt="License" src="https://img.shields.io/badge/LICENSE-FLAMINGO%20AI%20Unified%20v1.0-%23FFC109?style=for-the-badge&labelColor=white"></a>
-</p>
+**Fork of [`flamingo-stack/openframe-oss-tenant`](https://github.com/flamingo-stack/openframe-oss-tenant) refactored onto sangdb / hashtrinity / bedrock.**
 
-# OpenFrame OSS Tenant
+## What this is
 
-**OpenFrame OSS Tenant** is the multi-service, multi-tenant open-source foundation of the [OpenFrame platform](https://openframe.ai) — an AI-powered MSP (Managed Service Provider) platform built by [Flamingo](https://flamingo.run) that replaces expensive proprietary software with intelligent automation.
+The upstream OpenFrame OSS Tenant is a multi-service, multi-tenant
+MSP/RMM platform built on Spring Boot (Java 21) + Netflix DGS (GraphQL)
++ Spring Cloud Gateway + Spring Authorization Server + 6 backing data
+systems (Kafka, NATS JetStream, MongoDB, Cassandra, Apache Pinot, Redis).
+**3,147 commits**, **8 service shells**, **1 Rust agent**.
 
-It integrates device management, real-time messaging, AI-assisted support (**Mingo AI** for technicians, **Fae** for clients), and event-driven automation across a polyglot microservice architecture built on Spring Boot (Java) and Rust.
+This fork replaces every Java service and every data-system dependency
+with **Rust crates over the hashtrinity primitive** — one
+`hashtrinity::Table<K, V>` per concern, read at one of 5 applicatives
+(row / column / posting / vector / edge) of one `Term`. The 6 upstream
+data systems collapse into 5 sangdb faces; the 6 upstream Spring Boot
+services collapse into 11 Rust crates over `bedrock::sangdb` + `hashtrinity`.
 
-[![OpenFrame v0.7.8: Fleet MDM Integration &amp; Platform Architecture Deep Dive](https://img.youtube.com/vi/FgQu7hfKJKw/maxresdefault.jpg)](https://www.youtube.com/watch?v=FgQu7hfKJKw)
+See [docs/MIGRATION.md](docs/MIGRATION.md) for the full migration design.
 
----
-
-## ✨ Features
-
-- **AI-Assisted Support** — Mingo AI for technicians and Fae for end clients, both powered by streaming LLMs with real-time response delivery
-- **Cross-Platform Rust Agent** — `openframe-client` runs as a system service on Windows, macOS, and Linux; supports script execution, tool management, and self-updating via Velopack
-- **Multi-Tenant Architecture** — Full tenant isolation with per-tenant OAuth2 clients, RSA-signed JWTs, and `TenantAwareMongoTemplate` database scoping
-- **Real-Time Event Streaming** — Apache Kafka + NATS JetStream for device events, script execution results, and AI message chunk delivery
-- **Remote Management (RMM)** — Script execution (bash, PowerShell, Python, Nushell), scheduling, live commands, and compliance checking across all managed endpoints
-- **Integrated Tool Management** — MeshCentral, FleetMDM, and custom tool agents orchestrated through the platform
-- **SSO Support** — Google and Microsoft OIDC integration via the Spring Authorization Server
-- **GraphQL API** — Netflix DGS-powered API service with full multi-tenant scoping
-- **Open Source & Self-Hostable** — Deploy and extend on your own infrastructure
-
----
-
-## 🏗️ Architecture
-
-All client traffic passes through the Spring Cloud Gateway. Backend services communicate via HTTP/GraphQL internally and asynchronously via Kafka and NATS JetStream. The Rust agent communicates exclusively over NATS.
-
-```mermaid
-graph TB
-    subgraph Clients["Client Layer"]
-        FrontendUI["openframe-frontend\n(Web UI)"]
-    end
-
-    subgraph Gateway["Edge Layer"]
-        GW["Gateway Service :8081\n(Spring Cloud Gateway)"]
-    end
-
-    subgraph CoreServices["Core Services"]
-        API["API Service :8080\n(Spring Boot + GraphQL)"]
-        AuthServer["Auth Server :8082\n(OAuth2 / OIDC)"]
-        ExtAPI["External API :8083\n(Spring Boot REST)"]
-        StreamSvc["Stream Service :8085\n(Kafka Streams)"]
-        ClientSvc["Client Service :8084\n(Spring Boot + NATS)"]
-    end
-
-    subgraph AgentLayer["Agent Layer"]
-        OFClient["openframe-client\n(Rust System Agent)"]
-    end
-
-    subgraph DataLayer["Data Layer"]
-        Mongo[("MongoDB")]
-        Cassandra[("Cassandra")]
-        Pinot[("Apache Pinot")]
-        Redis[("Redis")]
-        Kafka[("Apache Kafka")]
-        NATS[("NATS JetStream")]
-    end
-
-    FrontendUI --> GW
-    GW --> API
-    GW --> AuthServer
-    GW --> ExtAPI
-    API --> Mongo
-    API --> Pinot
-    API --> Kafka
-    StreamSvc --> Kafka
-    StreamSvc --> Cassandra
-    StreamSvc --> Pinot
-    ClientSvc --> Mongo
-    ClientSvc --> NATS
-    AuthServer --> Mongo
-    OFClient --> NATS
-    OFClient --> API
-```
-
-### Core Components
-
-| Component | Language | Port | Responsibility |
-|---|---|---|---|
-| **API Service** | Java / Spring Boot 3.3 | 8080 | REST + GraphQL APIs; tickets, dialogs, AI settings, tenant management |
-| **Authorization Server** | Java / Spring Authorization Server | 8082 | Multi-tenant OAuth2/OIDC; RSA-signed JWT issuance; SSO (Google, Microsoft) |
-| **Gateway** | Java / Spring Cloud Gateway | 8081 | Security enforcement, JWT validation, routing, WebSocket proxy |
-| **External API** | Java / Spring Boot | 8083 | Rate-limited public API endpoints with API key management |
-| **Stream Service** | Java / Kafka Streams | 8085 | Real-time event normalization, enrichment, Cassandra/Pinot writes |
-| **Client Service** | Java / Spring Boot + NATS | 8084 | Agent lifecycle management, tool orchestration |
-| **openframe-client** | Rust | — | Cross-platform system agent; device registration, script execution, self-update |
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **JDK 21** (OpenJDK 21 recommended)
-- **Apache Maven 3.9+**
-- **Rust 1.78+** (stable) — install via [rustup](https://rustup.rs)
-
-### Clone and Build
+## Quick start
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/flamingo-stack/openframe-oss-tenant.git
-cd openframe-oss-tenant
-
-# 2. Build all backend services (Java / Spring Boot)
-mvn clean install -DskipTests
-
-# 3. Build the Rust agent
-cd clients/openframe-client
-OPENFRAME_VERSION=0.0.0-dev cargo build
-
-# 4. Return to root
-cd ../..
+cargo test --workspace --lib                            # 24 passing tests
+cargo build --bin of-api                                # API service (:8080)
+cargo build --bin sangdb-mongo 27017 default            # MongoDB wire-protocol server (:27017)
+cargo build --bin of-agent                              # Rust agent
+cargo build --bin of-config --bin of-gateway --bin of-authorization \
+  --bin of-external-api --bin of-client-svc --bin of-stream --bin of-management
 ```
-
-### Run a Backend Service
 
 ```bash
-# Start the API service
-mvn spring-boot:run -pl openframe/services/openframe-api
+# Terminal 1: MongoDB wire-protocol shim (replaces MongoDB)
+./target/debug/sangdb-mongo 27017 default
+# mongosh --host 127.0.0.1 --port 27017 --eval 'db.devices.find().toArray()'
+
+# Terminal 2: API service (replaces openframe-api)
+./target/debug/of-api
+
+# Terminal 3: Gateway (replaces Spring Cloud Gateway)
+./target/debug/of-gateway
+
+# Terminal 4: Rust agent (replaces clients/openframe-client)
+./target/debug/of-agent run
 ```
 
-### Verify the Rust Agent
+## Crate ↔ Service mapping
 
-```bash
-./clients/openframe-client/target/debug/openframe-client --help
-```
+| Upstream (Java) | New (Rust) | Wire surface |
+|---|---|---|
+| `openframe-api-service-core` | `of-api` | `:8080` — REST + GraphQL |
+| `openframe-gateway-service-core` | `of-gateway` | `:8081` — reverse-proxy |
+| `openframe-authorization-service-core` | `of-authorization` | `:8082` — OAuth2/OIDC |
+| `openframe-external-api-service-core` | `of-external-api` | `:8083` — public REST |
+| `openframe-client-core` (Java) | `of-client-svc` | `:8084` — agent control plane |
+| `openframe-stream-service-core` | `of-stream` | `:8085` — Kafka Streams replacement |
+| `openframe-management-service-core` | `of-management` | `:8086` — admin |
+| `openframe-config-core` | `of-config` | `:8888` — Spring Cloud Config replacement |
+| `clients/openframe-client` (Rust) | `of-agent` | system agent |
+| `openframe-data-mongo-sync/reactive` | `sangdb-bindings-mongodb` | `:27017` — MongoDB wire-protocol |
+| `openframe-data-cassandra` | `sangdb-bindings-cassandra` | CQL API |
+| `openframe-data-kafka` | `sangdb-bindings-kafka` | Producer/Consumer API |
+| `openframe-data-nats` | `sangdb-bindings-nats` | JetStream API |
+| `openframe-data-pinot` | `sangdb-bindings-pinot` | SQL API |
+| `openframe-data-redis` | `bedrock::sangdb::resp` (upstream) | `:6379` — RESP2 |
 
-### Agent Doctor Check
+## The collapse
 
-```bash
-cd clients/openframe-client
-./target/debug/openframe-client doctor
-```
+The 6 data systems are 6 engines. They are **5 primitives = `x = B/U` at 5
+applicatives over one `Term`** — proven closed form. The 18 stores
+subsumed in `bedrock::sangdb::mod` are not 18 engines; they are 5 faces
+of one hashtrinity `Table`. See [docs/MIGRATION.md](docs/MIGRATION.md)
+for the per-system mapping.
 
-### Install Agent as a System Service
+## Provenance
 
-```bash
-sudo ./target/release/openframe-client install \
-  --serverUrl https://your-openframe-instance.example.com \
-  --initialKey YOUR_INITIAL_KEY \
-  --orgId YOUR_ORG_ID
-```
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology |
-|---|---|
-| Backend services | Java 21, Spring Boot 3.3, Spring Cloud Gateway, Spring Authorization Server, Netflix DGS (GraphQL) |
-| Endpoint agent | Rust (stable), async-nats, tokio, Velopack |
-| Event streaming | Apache Kafka, Kafka Streams |
-| Agent messaging | NATS JetStream |
-| Primary datastore | MongoDB (multi-tenant, tenant-scoped) |
-| Time-series storage | Apache Cassandra |
-| Real-time analytics | Apache Pinot |
-| Cache / sessions | Redis |
-| Shared UI library | `@flamingo-stack/openframe-frontend-core` (npm) |
-
----
-
-## 📁 Repository Structure
-
-```text
-openframe-oss-tenant/
-├── openframe/
-│   └── services/              # Spring Boot microservices
-│       ├── openframe-api/     # Core REST + GraphQL API (port 8080)
-│       ├── openframe-gateway/ # Spring Cloud Gateway (port 8081)
-│       ├── openframe-authorization-server/ # OAuth2/OIDC (port 8082)
-│       ├── openframe-external-api/         # Public API (port 8083)
-│       ├── openframe-client/  # Agent lifecycle service (port 8084)
-│       ├── openframe-stream/  # Kafka Streams (port 8085)
-│       ├── openframe-management/
-│       └── openframe-config/
-├── clients/
-│   └── openframe-client/      # Rust cross-platform agent
-├── manifests/                 # Kubernetes manifests & data service configs
-└── pom.xml                    # Parent Maven POM
-```
-
----
-
-## 🔧 CLI Tools
-
-The OpenFrame CLI tools are maintained in a separate repository:
-
-- **Repository:** [flamingo-stack/openframe-cli](https://github.com/flamingo-stack/openframe-cli)
-- **Installation:** [Installation Guide](https://github.com/flamingo-stack/openframe-cli#installation)
-- **Documentation:** [CLI Documentation](https://github.com/flamingo-stack/openframe-cli/tree/main/docs)
-
----
-
-## 📚 Documentation
-
-Full documentation is available in the [`docs/`](./docs/README.md) directory:
-
-- [Introduction](./docs/getting-started/introduction.md) — What is OpenFrame OSS Tenant?
-- [Prerequisites](./docs/getting-started/prerequisites.md) — Environment requirements
-- [Quick Start](./docs/getting-started/quick-start.md) — Step-by-step setup guide
-- [First Steps](./docs/getting-started/first-steps.md) — Explore the platform after setup
-- [Architecture Overview](./docs/development/architecture/README.md) — Diagrams and component relationships
-- [Development Guide](./docs/development/README.md) — Full development documentation
-- [Contributing Guidelines](./docs/development/contributing/guidelines.md) — How to contribute
-
----
-
-## 🤝 Community
-
-All support, feature requests, bug reports, and development discussions happen in the **OpenMSP Slack community** — GitHub Issues and GitHub Discussions are not used.
-
-- **OpenMSP Community:** [https://www.openmsp.ai/](https://www.openmsp.ai/)
-- **Join Slack:** [Invite Link](https://join.slack.com/t/openmsp/shared_invite/zt-36bl7mx0h-3~U2nFH6nqHqoTPXMaHEHA)
-- **OpenFrame Website:** [https://openframe.ai](https://openframe.ai)
-- **Flamingo Platform:** [https://flamingo.run](https://flamingo.run)
-- **Releases:** [github.com/flamingo-stack/openframe-oss-tenant/releases](https://github.com/flamingo-stack/openframe-oss-tenant/releases)
-
----
-
-<div align="center">
-  Built with 💛 by the <a href="https://www.flamingo.run/about"><b>Flamingo</b></a> team
-</div>
+- Upstream: [`flamingo-stack/openframe-oss-tenant`](https://github.com/flamingo-stack/openframe-oss-tenant)
+- Upstream libraries: [`flamingo-stack/openframe-oss-lib`](https://github.com/flamingo-stack/openframe-oss-lib)
+- Both repos forked to [`yokoszn/`](https://github.com/yokoszn) on GitHub.
+- This repo: [`twn/RnD/openframe-sangdb`](https://gitlab.tas.twn.network/twn/RnD/openframe-sangdb)
+  on `gitlab.tas.twn.network`, branch `sangdb-migration`.

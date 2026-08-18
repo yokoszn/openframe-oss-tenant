@@ -1,0 +1,62 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/openframe-domain",
+    "crates/sangdb-bindings-mongodb",
+    "crates/sangdb-bindings-cassandra",
+    "crates/sangdb-bindings-kafka",
+    "crates/sangdb-bindings-nats",
+    "crates/sangdb-bindings-pinot",
+    "crates/of-config",
+    "crates/of-gateway",
+    "crates/of-api",
+    "crates/of-authorization",
+    "crates/of-external-api",
+    "crates/of-client-svc",
+    "crates/of-stream",
+    "crates/of-management",
+    "crates/of-agent",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+license = "MIT"
+authors = ["TWN / RnD"]
+description = "OpenFrame OSS Tenant fork — sangdb/hashtrinity/bedrock refactor"
+repository = "https://gitlab.tas.twn.network/twn/RnD/openframe-sangdb"
+publish = false
+
+[workspace.dependencies]
+# The substrate: hashtrinity + bedrock from the fold workspace, NOT vendored here.
+# We enable the hashtrinity features we need across all crates: codec/derive for
+# the JSON+derive macros, hex+base64+rustls-provider for crypto/sync features.
+hashtrinity = { path = "../fold/hashtrinity", default-features = false, features = ["codec", "derive", "hex", "base64", "rustls-provider"] }
+bedrock = { path = "../fold/bedrock" }
+
+# Standard deps
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+thiserror = "1"
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4", features = ["derive"] }
+futures = "0.3"
+bytes = "1"
+parking_lot = "0.12"
+dashmap = "6"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = 1

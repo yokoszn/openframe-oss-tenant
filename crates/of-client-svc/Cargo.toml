@@ -1,0 +1,19 @@
+[package]
+name = "of-client-svc"
+version.workspace = true
+edition.workspace = true
+description = "openframe-client-svc — replaces openframe-client-core (Java service). Agent lifecycle management: registration secrets, heartbeat ingest, RMM script scheduling, command delivery. Replaces the upstream's MongoDB store with hashtrinity::Table, NATS messaging with sangdb-bindings-nats. The Rust agent (of-agent) talks to this service over its REST surface."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["env"] }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }
+sangdb-bindings-nats = { path = "../sangdb-bindings-nats" }

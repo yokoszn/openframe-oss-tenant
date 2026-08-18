@@ -1,0 +1,19 @@
+[package]
+name = "of-stream"
+version.workspace = true
+edition.workspace = true
+description = "openframe-stream — replaces openframe-stream-service-core (Kafka Streams processor). Streaming-law fold over per-tenant topics — `fold_group` on the sangdb Log, order-free, merge on shard boundaries. The upstream's Kafka Streams KTable/KStream collapse to one fold per topic; Kafka consumer-group semantics ride the same Log read-position primitive as the Kafka binding."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+hashtrinity = { workspace = true, features = ["codec", "derive"] }
+tokio = { workspace = true, features = ["net", "io-util", "sync", "macros", "rt-multi-thread", "time"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true, features = ["env"] }
+uuid = { workspace = true }
+openframe-domain = { path = "../openframe-domain" }
+sangdb-bindings-kafka = { path = "../sangdb-bindings-kafka" }
