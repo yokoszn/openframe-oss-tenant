@@ -32,8 +32,8 @@ publish = false
 # The substrate: hashtrinity + bedrock from the fold workspace, NOT vendored here.
 # We enable the hashtrinity features we need across all crates: codec/derive for
 # the JSON+derive macros, hex+base64+rustls-provider for crypto/sync features.
-hashtrinity = { path = "../fold/hashtrinity", default-features = false, features = ["codec", "derive", "hex", "base64", "rustls-provider"] }
-bedrock = { path = "../fold/bedrock" }
+hashtrinity = { git = "https://gitlab.tas.twn.network/twn/ptyktos/hashtrinity.git", default-features = false, features = ["codec", "derive", "hex", "base64", "rustls-provider"] }
+bedrock = { git = "https://github.com/Ptyktos/bedrock", default-features = false, features = ["native"] }
 
 # Standard deps
 tokio = { version = "1", features = ["full"] }
