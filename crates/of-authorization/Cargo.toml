@@ -16,3 +16,4 @@ chrono = { workspace = true }
 clap = { workspace = true, features = ["env"] }
 uuid = { workspace = true }
 openframe-domain = { path = "../openframe-domain" }
+sangdb-bindings-mongodb = { path = "../sangdb-bindings-mongodb" }

@@ -1,0 +1,379 @@
+{
+  "task": "Rebuild the frontend image with NEXT_PUBLIC_TENANT_HOST_URL=http://10.0.64.11 so the dashboard data hooks resolve correctly. Patch the chunks in the running container.",
+  "repo_root": "/home/ctown/projects/openframe-sangdb",
+  "created_by": "syndesi harness",
+  "phase": "Planning",
+  "constraints": [
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.env`",
+      "check": "path:.env"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.pem`",
+      "check": "path:.pem"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.key`",
+      "check": "path:.key"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.p12`",
+      "check": "path:.p12"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.pfx`",
+      "check": "path:.pfx"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `credentials`",
+      "check": "path:credentials"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `secrets/`",
+      "check": "path:secrets"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.ssh/`",
+      "check": "path:.ssh"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.aws/`",
+      "check": "path:.aws"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.gnupg/`",
+      "check": "path:.gnupg"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.git/`",
+      "check": "path:.git"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.claude/`",
+      "check": "path:.claude"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.agents/`",
+      "check": "path:.agents"
+    },
+    {
+      "id": "FLOOR",
+      "rank": 0,
+      "source": "machine floor",
+      "text": "Never edit/write anything whose path contains `.config/opencode`",
+      "check": "path:.config/opencode"
+    },
+    {
+      "id": "C1",
+      "rank": 2,
+      "source": "/home/ctown/.config/opencode/AGENTS.md",
+      "text": "If a guard ever passes something it should refuse, fix the guard — do not",
+      "check": null
+    },
+    {
+      "id": "C2",
+      "rank": 0,
+      "source": "/home/ctown/.config/opencode/AGENTS.md",
+      "text": "A class of solution that failed once is never re-proposed; three failed",
+      "check": null
+    },
+    {
+      "id": "C3",
+      "rank": 0,
+      "source": "/home/ctown/.config/opencode/AGENTS.md",
+      "text": "Never run the heavy path when the cheap path answers the question.",
+      "check": null
+    },
+    {
+      "id": "C4",
+      "rank": 0,
+      "source": "/home/ctown/projects/openframe-sangdb/CLAUDE.md",
+      "text": "- Use components from `@flamingo-stack/openframe-frontend-core` — never create custom UI primitives",
+      "check": null
+    },
+    {
+      "id": "C5",
+      "rank": 2,
+      "source": "/home/ctown/projects/openframe-sangdb/CLAUDE.md",
+      "text": "- Apache NiFi (removed from project - NOTE: Some NiFi dependencies may still exist in pom.xml but should not be used)",
+      "check": null
+    },
+    {
+      "id": "C6",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "`song/AGENTS.md` line 5 already points at it (`鍵 ∈ ../AGENTS.md`); it had never been written, so",
+      "check": null
+    },
+    {
+      "id": "C7",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "a theorem in `sanguine-refound-s/proof/` saying so. You do not \"implement a transformer\" or \"build",
+      "check": null
+    },
+    {
+      "id": "C8",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "theorem for the algebra; the reading is `L1` and earns lower billing (`VERF-3` — do not spend the",
+      "check": null
+    },
+    {
+      "id": "C9",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "the choice between them is the only place judgement lives. **Sampled**: for inputs that do not",
+      "check": null
+    },
+    {
+      "id": "C10",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "lift and Torch-JEPA. Prefer solved when the data has a coupling to fold; `cone_fraction` tells",
+      "check": null
+    },
+    {
+      "id": "C11",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "flat spectrum is a finding worth reporting in one line. What is forbidden is the twelfth variant of",
+      "check": null
+    },
+    {
+      "id": "C12",
+      "rank": 1,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "- **FACE-2** — the lift MUST be a fixed type choice (the applicative alpha), **not a trained",
+      "check": null
+    },
+    {
+      "id": "C13",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "layer**. A trained lift is permitted only as a *named second lift* (the boost face), never the",
+      "check": null
+    },
+    {
+      "id": "C14",
+      "rank": 1,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "- **REG-4** — a new architecture must beat the reservoir baseline (random Fourier features +",
+      "check": null
+    },
+    {
+      "id": "C15",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "(`cone_fraction`; you get a variable per mode and you do not want them all — cut `r` where the cone",
+      "check": null
+    },
+    {
+      "id": "C16",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "Model Zoo` at once. Settled, already measured — do not re-derive it:",
+      "check": null
+    },
+    {
+      "id": "C17",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "> on* — not that learning the encoder is forbidden.",
+      "check": null
+    },
+    {
+      "id": "C18",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "1. **A class of solution that failed once MUST NOT be re-proposed.** Write the failure down with",
+      "check": null
+    },
+    {
+      "id": "C19",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "2. **Three failed attempts on one problem ends the attempts.** Stop and report the boundary. Do not",
+      "check": null
+    },
+    {
+      "id": "C20",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "job is to find which rung the work is on and **stand on the ones below, never re-derive them**.",
+      "check": null
+    },
+    {
+      "id": "C21",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "**Do NOT check for other build processes before building.** Run the build directly. Standing rule:",
+      "check": null
+    },
+    {
+      "id": "C22",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "2. If the sandbox target dir is in use (`/home/ctown/projects/.agent-work/cargo-target/`), do not",
+      "check": null
+    },
+    {
+      "id": "C23",
+      "rank": 0,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "3. Never gate a build on a `ps aux | grep cargo` check. The `cargo` process is the lock; you do",
+      "check": null
+    },
+    {
+      "id": "C24",
+      "rank": 2,
+      "source": "/home/ctown/projects/AGENTS.md",
+      "text": "4. Do not verify the binary timestamp moved after a build. If the build's exit code is 0, treat",
+      "check": null
+    },
+    {
+      "id": "C25",
+      "rank": 1,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "When working in this monorepo, always verify you are in the correct project directory before making any file changes. Run `pwd` and `ls` to confirm context before editing Cargo.toml, package.json, or any config files.",
+      "check": null
+    },
+    {
+      "id": "C26",
+      "rank": 1,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "Primary languages: TypeScript and Rust. Package manager: Bun (not npm). When generating code, use RS256 for JWT validation (not HS256). Always include all necessary imports in generated Rust code.",
+      "check": null
+    },
+    {
+      "id": "C27",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "Key projects: AMIE (Rust cloud management API), MSSP portal (o2s-operator for service ops, CreatureGRC for security/GRC), OpenFang, frontend-tascloud (TypeScript/Bun). The marketing site and the portal are separate projects — do not confuse them.",
+      "check": null
+    },
+    {
+      "id": "C28",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "When the user gives you a plan or task list, execute it immediately. Do not spend time on setup overhead (skill loading, worktree creation, environment scanning) unless explicitly asked. Bias toward action over preparation.",
+      "check": null
+    },
+    {
+      "id": "C29",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "- Read config files, test commands, check actual error messages — don't assume",
+      "check": null
+    },
+    {
+      "id": "C30",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "- If you're wrong about something, acknowledge it and fix it; don't repeat the same false diagnosis",
+      "check": null
+    },
+    {
+      "id": "C31",
+      "rank": 0,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "- `bun.lock` — Lock file (use Bun, never npm)",
+      "check": null
+    },
+    {
+      "id": "C32",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "archived. Do not work on them. AI tooling work continues in Rust under `ai-projects/` (AMIE).",
+      "check": null
+    },
+    {
+      "id": "C33",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "Do NOT cycle through speculative fixes. When debugging, state your hypothesis, test it with a single minimal change, and verify before moving on. If 3 attempts fail on the same issue, stop and ask the user for more context rather than trying a 4th guess.",
+      "check": null
+    },
+    {
+      "id": "C34",
+      "rank": 0,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "- **Never blame user setup without checking actual config first** — Read files, check environment, verify commands actually work before claiming something is invalid",
+      "check": null
+    },
+    {
+      "id": "C35",
+      "rank": 2,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "- **Test commands directly** — If something fails, run the exact command and see the actual error, don't assume",
+      "check": null
+    },
+    {
+      "id": "C36",
+      "rank": 0,
+      "source": "/home/ctown/projects/CLAUDE.md",
+      "text": "- **Never gaslight** — Don't repeat the same false diagnosis multiple times; actually debug when the user corrects you",
+      "check": null
+    }
+  ],
+  "steps": [],
+  "created_unix": 1787395493,
+  "task_hash": "91e8cbf28a7400b8",
+  "sources": [
+    {
+      "path": "/home/ctown/.config/opencode/AGENTS.md",
+      "hash": "08941b99323ce04e"
+    },
+    {
+      "path": "/home/ctown/projects/openframe-sangdb/CLAUDE.md",
+      "hash": "85008f883b5a8e72"
+    },
+    {
+      "path": "/home/ctown/projects/AGENTS.md",
+      "hash": "a2dc1aec622299c1"
+    },
+    {
+      "path": "/home/ctown/projects/CLAUDE.md",
+      "hash": "f3c28f95e979908c"
+    }
+  ]
+}

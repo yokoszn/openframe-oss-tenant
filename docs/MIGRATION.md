@@ -128,15 +128,131 @@ What's implemented:
 - [x] `update` (`$set`, `$unset`, bare-key set)
 - [x] `delete`
 - [x] `count`
+- [x] unique and partial-unique compound indexes (`createIndexes`, duplicate-key code 11000)
+- [x] aggregation stages used by OpenFrame (`$match`, `$count`, `$group`, `$unwind`,
+      `$project`, `$lookup`, `$addFields`, `$facet`, `$sort`, `$limit`, `$skip`)
 - [x] camelCase → snake_case field-name reconciliation (the bridge between
       Spring Data MongoDB POJOs and the sangdb domain types)
 
 What's not yet implemented (TODO):
 
-- [ ] Aggregation pipeline → sangdb column face (`fold_group`)
-- [ ] Indexes → sangdb LSH for vector, posting face for text
+- [ ] remaining aggregation expressions outside the measured OpenFrame surface
+- [ ] non-unique query-planning indexes → sangdb LSH for vector, posting face for text
 - [ ] Change streams → sangdb `Log::ConsumerGroup`
 - [ ] Replica-set / sharded cluster → sangdb `partition.rs`
+
+## BSON + MongoDB wire-protocol module layout (refactor 2026-08-20)
+
+The shim's two foundational pieces — the BSON codec and the wire-protocol framing —
+are split into clean sub-modules mirroring the hashtrinity codec face pattern
+(`hashtrinity::codec::msgpack` is the reference — `pub fn encode/decode(bytes)` over
+the universal `SyntaxTerm`):
+
+```
+crates/sangdb-bindings-mongodb/src/
+├── bson/                 # BSON surface — zero-copy encode/decode over &[u8]
+│   ├── mod.rs            # re-exports + module doc (canonical home: hashtrinity)
+│   ├── value.rs          # BsonValue enum + BsonDoc (BTreeMap<String, BsonValue>)
+│   └── codec.rs          # encode(&BsonDoc) -> Vec<u8>, decode(&[u8]) -> Result<BsonDoc>
+├── wire/                 # MongoDB wire-protocol framing
+│   ├── mod.rs            # opcode constants (OP_MSG=2013, OP_QUERY=2004, OP_REPLY=1),
+│   │                       flags module, re-exports
+│   └── mongodb.rs        # Header, OpMsg, OpMsgSection, OpQuery, OpReply — all
+│                            zero-copy `&[u8]` decoders
+├── query.rs              # MongoDB command → sangdb query translation (find/insert/update/delete/
+│                            count/distinct/drop/aggregate + filter operators $and/$or/$in/$ne/$lt/$gt/…)
+├── server.rs             # tokio TCP server that speaks the wire protocol
+└── codec_bridge.rs       # camelCase ↔ snake_case field reconciliation
+```
+
+The hand-rolled `bson.rs` and `opcodes.rs` files were removed (moved into the sub-modules
+above). The refactor is **behavior-neutral** — the same wire bytes are produced and consumed.
+The only public API change is `Bson` → `BsonValue` (the value type was renamed to match
+the hashtrinity surface naming).
+
+### Differential gate (vs real mongo:7)
+
+The shim is verified against `openframe-data-mongo-sync` (the upstream Spring Data MongoDB
+integration test suite, 14 IT classes, 258 test methods):
+
+```
+mvn -pl openframe-data-mongo-sync test -Dintegration.tests=true \
+    -Dmongo.external.uri="mongodb://127.0.0.1:37017/test?directConnection=true"
+```
+
+Per the differential rule (every shim failure must map to a real-mongo failure, or be a
+located sangdb-specific gap):
+
+| Result             | Real mongo:7 baseline | sangdb-mongo (current) |
+|--------------------|----------------------:|-----------------------:|
+| Total tests        | 258                   | 258                    |
+| Pass               | 244                   | 244                    |
+| Failures           | 0                     | 0                      |
+| Errors             | 0                     | 0                      |
+| Skipped (perf IT)  | 14                    | 14                     |
+| Maven suite time   | 8.836 s               | 5.950 s                |
+
+Measured 2026-08-22 on the same staged source and host, same data, same fixtures. Both
+backends are fully green (0 failures, 0 errors) and sangdb completes the suite **1.48x
+faster**. Unique compound-index enforcement, repeat/null compound-key sorting, keyset
+pagination, `$lookup` (with `$toString` ObjectId/string joins), `$expr`, `$size`,
+`$addFields`, `$$NOW` pipeline updates, unordered-bulk `writeErrors`, and
+`listIndexes` metadata replay are all exercised by the upstream tests.
+
+Four upstream test/bootstrap defects were found by the differential and fixed in the
+staged test/library source (identical on both backends — they were shared failures,
+not sangdb deviations):
+
+- `ScriptRepositoryIT.compoundUniqueIndex_enforced_OnTenantAndName`: the RMM test
+  application did not import `MongoIndexConfig`, so the partial-unique index was never
+  created. Fixed by importing it in `RmmIntegrationTestApplication`.
+- Three `ScriptScheduleRepositoryIT` device-count tests: fixtures wrote one assignment
+  document containing a `machineIds` array while production `ScriptScheduleMachineAssigned`
+  stores one document per machine (`{tenantId, scriptScheduleId, machineId}` unique);
+  the pipeline compared `$_id` (ObjectId) against string `scriptScheduleId`, matching
+  nothing. Fixed the fixture to the production shape and the `$lookup` `let` to
+  `$toString` the ObjectId.
+- 42 `IntegrationTestApplication` context errors: the notification test context imported
+  the tenant-aware repository fragments without a `TenantAwareMongoTemplate` /
+  `TenantIdProvider`, and never set `openframe.tenant-isolation.enabled`. Fixed with
+  test-scoped beans (null-tenant provider) and the isolation flag in
+  `BaseMongoIntegrationTest`.
+
+Sangdb-specific gaps found and closed in the same pass (each reproduced as a failing
+upstream test before the fix): `$toString` expression evaluation, `updates_` kind-1
+document-sequence identifier + pipeline-form `u` payloads, `$$NOW` evaluation in
+update pipelines, missing `nModified` in update replies (Spring `long` returns read
+it), unordered-bulk `writeErrors` semantics (continue past 11000, report per-doc),
+`listIndexes` replay of recorded specs, and BSON key-order preservation
+(`BsonDoc` moved from `BTreeMap` to an insertion-ordered map — index `key` field
+order is wire-significant).
+
+### Upstream port plan (TEMPORARY location)
+
+The canonical home for these modules is **`hashtrinity::codec::{bson, wire::mongodb}`**,
+as the BSON + MongoDB wire surfaces alongside `hashtrinity::codec::msgpack`. The landing in
+`sangdb-bindings-mongodb` remains temporary; the upstream codec port is a separate move:
+
+1. Move `bson/{mod,value,codec}.rs` → `hashtrinity/src/codec/bson/{mod,value,codec}.rs`.
+2. Move `wire/mongodb.rs` (and the opcode constants from `wire/mod.rs`) →
+   `hashtrinity/src/codec/wire/mod.rs` + `hashtrinity/src/codec/wire/mongodb.rs`.
+3. Re-export from `sangdb-bindings-mongodb` via
+   `pub use hashtrinity::codec::{bson, wire::mongodb};` — the public API stays the same.
+4. Update the differential gate to confirm the port is a no-op (same wire bytes in,
+   same wire bytes out).
+
+The local `BsonValue`/`BsonDoc` types are **the surface** (not a `SyntaxTerm` mapping).
+When ported, the surface stays — `hashtrinity::codec::bson` would carry the BSON-specific
+value type the same way `hashtrinity::codec::msgpack` carries its own (msgpack has no
+shared value type with `SyntaxTerm`, it maps directly). For consumers that want the
+`SyntaxTerm` projection (lossy for ObjectId/Binary/DateTime/Regex), the surface adds a
+`pub fn as_term(&self) -> SyntaxTerm` — the standard hashtrinity surface pattern.
+
+The shim has exact result parity against the upstream's primary Spring Data MongoDB
+workload (`openframe-data-mongo-sync`): 258/258 green on both mongo:7 and sangdb
+(0 failures, 0 errors, 14 perf-IT skips on each).
+The hand-rolled BSON and wire-protocol code in this crate was replaced by the clean
+sub-module layout above (no external deps added; no `bson` crate pulled in).
 
 ## The fold is the architecture
 

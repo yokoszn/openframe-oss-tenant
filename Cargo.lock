@@ -102,7 +102,7 @@ dependencies = [
  "bytes",
  "hashtrinity",
  "libc",
- "modelfold",
+ "rayon",
  "rustls",
  "rustls-native-certs",
  "rustls-pki-types",
@@ -130,15 +130,6 @@ name = "bytes"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
-
-[[package]]
-name = "cast-cli-macro"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
 
 [[package]]
 name = "cc"
@@ -259,9 +250,9 @@ checksum = "61803da095bee82a81bb1a452ecc25d3b2f1416d1897eb86430c6159ef717c17"
 
 [[package]]
 name = "either"
-version = "1.17.0"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e5e8f6c15a24b9a3ee5efec809ccd006d3b30e8b3bb63c39af737c7f87daa1d"
+checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
 
 [[package]]
 name = "errno"
@@ -446,16 +437,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "modelfold"
-version = "0.1.0"
-dependencies = [
- "cast-cli-macro",
- "hashtrinity",
- "libc",
- "rayon",
-]
-
-[[package]]
 name = "nu-ansi-term"
 version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -518,6 +499,7 @@ dependencies = [
  "clap",
  "hashtrinity",
  "openframe-domain",
+ "sangdb-bindings-mongodb",
  "serde",
  "serde_json",
  "tokio",
@@ -865,7 +847,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "bedrock",
  "bytes",
  "hashtrinity",
  "openframe-domain",
