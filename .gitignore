@@ -70,3 +70,10 @@ openframe/services/openframe-frontend/next-env.d.ts
 # Yalc
 .yalc
 yalc.lock
+# Agent scratch - never commit
+.harness/
+.box/
+.cache/
+__pycache__/
+*.pyc
+*.log
